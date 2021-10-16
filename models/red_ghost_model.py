@@ -66,7 +66,7 @@ class RedGhost(pygame.sprite.Sprite):
         if self.previous_frame_path_calc_player_tile is not None and self.previous_frame_path_calc_player_tile is self.player_model.current_tile:
             return
 
-        self.path = self.path_finder.find(self.current_tile, self.player_model.current_tile).copy()
+        self.path = [self.current_tile.neighbours[0]]# self.path_finder.find(self.current_tile, self.player_model.current_tile).copy()
 
         self.previous_frame_path_calc_player_tile = self.player_model.current_tile
 

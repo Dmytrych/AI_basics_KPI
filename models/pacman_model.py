@@ -1,6 +1,7 @@
 import pygame
 import os
 import math
+from a_star_path_finder import AStarPathFinder
 import models.move_direction
 from appsettings import window_size
 from appsettings import image_store_path
@@ -21,6 +22,12 @@ class Pacman(pygame.sprite.Sprite):
         self.left_animation_sprites = self.get_left_sprites()
         self.up_down_animation_sprites = self.get_up_down_sprites()
         self.current_tile = spawn_tile
+
+        self.path_finder = AStarPathFinder()
+        self.path = None
+
+        self.destination_food = None
+
         self.movement_speed = math.floor(tile_size / frames_between_tile_pass)
         self.current_move_animation_frame = 0
         self.selected_move_direction = user_input_handler.selected_direction
@@ -32,10 +39,12 @@ class Pacman(pygame.sprite.Sprite):
         self.image = self.right_animation_sprites[self.current_sprite_index]
         self.rect = self.image.get_rect()
         self.set_pos(spawn_tile.rect.x, spawn_tile.rect.y)
+                
 
     def update(self):
-        if not self.killed:
-            self.selected_move_direction = self.user_input.selected_direction
+        if True:#not self.killed:
+            food = self.locate_closest_food_bfs(self.current_tile)
+            self.selected_move_direction = self.path_finder.find(self.current_tile, food)[0]
 
             self.animation_tick_counter += 1
             if self.animation_tick_counter % 3 == 0:
@@ -88,8 +97,11 @@ class Pacman(pygame.sprite.Sprite):
 
     def try_switch_tile(self, neghbour_tile):
         if self.current_move_animation_frame is tile_switch_frame:
-            neghbour_tile.was_walked = True
             self.current_tile = neghbour_tile
+            food_tile = self.locate_closest_food_bfs(self.current_tile)
+            if(neghbour_tile.was_walked == False):
+                neghbour_tile.was_walked = True
+                self.path = self.path_finder.find(self.current_tile, food_tile)
     
     def move_x(self, distance):
         self.rect.x += distance
@@ -127,3 +139,51 @@ class Pacman(pygame.sprite.Sprite):
 
     def get_killed_sprite(self):
         return pygame.transform.scale(pygame.image.load(os.path.join(pacman_model_directory, "banana.png")).convert_alpha(), (self.tile_size, self.tile_size))
+
+    def locate_closest_food_bfs(self, start_tile):
+        self.clear_paint()
+
+        result = self.start_bfs(start_tile)
+        self.destination_food = result
+
+        self.paint_tiles()
+
+        return result
+
+    def start_bfs(self, start_tile):
+        self.ancestors_table = {}
+        self.visit_queue = []
+        self.walked_tiles = []
+
+        self.walked_tiles.append(start_tile)
+        for neighbour_info in start_tile.neighbours:
+            if(neighbour_info.tile.is_empty):
+                self.visit_queue.append(neighbour_info)
+                self.ancestors_table[neighbour_info] = start_tile
+
+        while len(self.visit_queue) != 0:
+            current_tile_info = self.visit_queue.pop(0)
+            found_tile = self.visit_bfs(current_tile_info)
+            if found_tile is not None:
+                return found_tile
+
+        print("WIIIIIN")
+        return None
+
+    def visit_bfs(self, tile_info):
+        if(not tile_info.tile.was_walked):
+            return tile_info.tile
+
+        for neighbour_info in tile_info.tile.neighbours:
+            if neighbour_info.tile.is_empty and neighbour_info.tile not in self.walked_tiles:
+                self.visit_queue.append(neighbour_info)
+                self.walked_tiles.append(neighbour_info.tile)
+                self.ancestors_table[neighbour_info] = tile_info
+        return None
+
+    def paint_tiles(self):
+        self.destination_food.set_tile_image(self.get_killed_sprite())
+
+    def clear_paint(self):
+        if self.destination_food is not None:
+            self.destination_food.update_sprite()
