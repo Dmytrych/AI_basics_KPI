@@ -49,7 +49,7 @@ pacman = Pacman(field.grid[field.player_spawn_y][field.player_spawn_x], field.ti
 reg_ghost = RedGhost(field.grid[field.player_spawn_y][field.player_spawn_x + 3], field.tile_size, pacman, input)
 all_sprites.add(pacman)
 all_sprites.add(reg_ghost)
-algo_index = 0
+algo_index = 1
 
 while running:
     # Держим цикл на правильной скорости
@@ -72,6 +72,7 @@ while running:
                 input.selected_algorythm = path_finder.algorythms[algo_index]
                 print("Current algo changed")
                 algo_index += 1
+                print(algo_index)
 
     # Обновление
     all_sprites.update()

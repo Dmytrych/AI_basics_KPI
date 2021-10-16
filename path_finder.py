@@ -4,7 +4,7 @@ import pygame
 from appsettings import image_store_path
 
 tile_model_directory = os.path.join(image_store_path, "tiles")
-algorythms = [ 0, 1]
+algorythms = [ 0, 1, 2]
 
 class PathFinder():
     painted_tile = pygame.image.load(os.path.join(tile_model_directory, "painted_tile.png"))
@@ -19,18 +19,21 @@ class PathFinder():
 
         print(self.user_input.selected_algorythm)
         if(self.user_input.selected_algorythm == 0):
+            print("using dfs search")
             self.visit_dfs(start_tile)
 
         if(self.user_input.selected_algorythm == 1):
             self.start_bfs(start_tile)
+            print("using bfs search")
+            self.path.reverse()
+
+        if(self.user_input.selected_algorythm == 2):
+            self.start_bfs(start_tile)
+            print("using uniform cost search")
             self.path.reverse()
 
         if self.path is None or len(self.path) == 0:
             return []
-
-        for item in self.path:
-            if(not item.tile.is_empty):
-                print("AHTUNG")
 
         self.paint_tiles()
 
