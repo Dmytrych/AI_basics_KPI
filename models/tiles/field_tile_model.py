@@ -15,20 +15,31 @@ class Tile(pygame.sprite.Sprite):
         self.is_empty = is_empty
         self.was_changed_empty = False
         self.was_walked = False
-        if is_empty:
-            self.image = pygame.transform.scale(Tile.coin_tile_sprite.convert_alpha(), (self.tile_size, self.tile_size))
-        else:
-            self.image = pygame.transform.scale(Tile.wall_tile_sprite.convert_alpha(), (tile_size, tile_size))
+        self.update_sprite()
         self.rect = self.image.get_rect()
         self.init_neighbours()
 
     def update(self):
-        if self.was_walked and not self.was_changed_empty:
-            self.image = pygame.transform.scale(Tile.empty_tile_sprite.convert_alpha(), (self.tile_size, self.tile_size))
+        if not self.was_changed_empty and self.was_walked:
+            self.update_sprite()
             self.was_changed_empty = True
 
     def init_neighbours(self):
-        self.left_neighbor = None
-        self.right_neighbor = None
-        self.upper_neighbor = None
-        self.bottom_neighbor = None
+        self.neighbours = []
+
+    def update_sprite(self):
+        if self.is_empty:
+            if self.was_walked:
+                self.set_tile_image(Tile.empty_tile_sprite.convert_alpha())
+                return
+            self.set_tile_image(Tile.coin_tile_sprite.convert_alpha())
+            return
+        self.set_tile_image(Tile.wall_tile_sprite.convert_alpha())
+
+    def set_tile_image(self, image):
+        self.image = pygame.transform.scale(image, (self.tile_size, self.tile_size))
+
+class FieldNeighbor():
+    def __init__(self, tile, side):
+        self.tile = tile
+        self.side = side

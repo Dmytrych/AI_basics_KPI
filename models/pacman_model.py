@@ -48,7 +48,7 @@ class Pacman(pygame.sprite.Sprite):
         self.image = self.get_killed_sprite()
 
     def move(self):
-        if self.current_move_animation_frame == frames_between_tile_pass or self.stop:
+        if self.current_move_animation_frame is frames_between_tile_pass or self.stop:
             self.set_pos(self.current_tile.rect.x, self.current_tile.rect.y)
             if self.try_turn_in_direction(self.selected_move_direction) or self.try_turn_in_direction(self.current_move_direction):
                 self.stop = False
@@ -61,39 +61,33 @@ class Pacman(pygame.sprite.Sprite):
             self.move_in_direction()
 
     def move_in_direction(self):
-        if self.current_move_direction == models.move_direction.left:
+        self.move_sprite(self.current_move_direction)
+        for neigbor_info in self.current_tile.neighbours:
+            if neigbor_info.side is self.current_move_direction:
+                self.try_switch_tile(neigbor_info.tile)
+
+    def move_sprite(self, direction):
+        if direction is models.move_direction.left:
             self.move_x(-self.movement_speed)
-            self.try_switch_tile(self.current_tile.left_neighbor)
-        elif self.current_move_direction == models.move_direction.right:
+        elif direction is models.move_direction.right:
             self.move_x(self.movement_speed)
-            self.try_switch_tile(self.current_tile.right_neighbor)
-        elif self.current_move_direction == models.move_direction.up:
+        elif direction is models.move_direction.up:
             self.move_y(-self.movement_speed)
-            self.try_switch_tile(self.current_tile.upper_neighbor)
         else:
             self.move_y(self.movement_speed)
-            self.try_switch_tile(self.current_tile.bottom_neighbor)
 
     def try_turn_in_direction(self, direction):
-        if direction == models.move_direction.left and self.current_tile.left_neighbor.is_empty:
-            self.choose_direction(direction)
-            return True
-        elif direction == models.move_direction.right and self.current_tile.right_neighbor.is_empty:
-            self.choose_direction(direction)
-            return True
-        elif direction == models.move_direction.up and self.current_tile.upper_neighbor.is_empty:
-            self.choose_direction(direction)
-            return True
-        elif direction == models.move_direction.down and self.current_tile.bottom_neighbor.is_empty:
-            self.choose_direction(direction)
-            return True
+        for neigbor_info in self.current_tile.neighbours:
+            if neigbor_info.side is direction and neigbor_info.tile.is_empty:
+                self.choose_direction(direction)
+                return True
         return False
 
     def choose_direction(self, direction):
         self.current_move_direction = direction
 
     def try_switch_tile(self, neghbour_tile):
-        if self.current_move_animation_frame == tile_switch_frame:
+        if self.current_move_animation_frame is tile_switch_frame:
             neghbour_tile.was_walked = True
             self.current_tile = neghbour_tile
     
