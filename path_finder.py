@@ -23,14 +23,18 @@ class PathFinder():
 
         if(self.user_input.selected_algorythm == 1):
             self.start_bfs(start_tile)
-            print(self.path_directions)
+            self.path.reverse()
 
         if self.path is None or len(self.path) == 0:
             return []
 
+        for item in self.path:
+            if(not item.tile.is_empty):
+                print("AHTUNG")
+
         self.paint_tiles()
 
-        return self.path_directions
+        return self.path
 
     def visit_dfs(self, tile):
         if(tile is self.end_tile):
@@ -56,8 +60,9 @@ class PathFinder():
 
         self.walked_tiles.append(start_tile)
         for neighbour_info in start_tile.neighbours:
-            self.visit_queue.append(neighbour_info)
-            self.ancestors_table[neighbour_info] = start_tile
+            if(neighbour_info.tile.is_empty):
+                self.visit_queue.append(neighbour_info)
+                self.ancestors_table[neighbour_info] = start_tile
 
         while len(self.visit_queue) != 0:
             current_tile_info = self.visit_queue.pop(0)

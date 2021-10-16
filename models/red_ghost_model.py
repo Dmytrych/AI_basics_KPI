@@ -44,7 +44,7 @@ class RedGhost(pygame.sprite.Sprite):
         if(self.player_model.current_tile == self.current_tile):
             self.player_model.kill()
 
-        self.selected_move_direction = self.path[0]
+        self.selected_move_direction = self.path[0].side
 
         self.animation_tick_counter += 1
         if self.animation_tick_counter % 3 == 0:
