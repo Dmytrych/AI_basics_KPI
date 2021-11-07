@@ -17,15 +17,14 @@ class PathFinder():
         print("path finder started")
         self.initialize_search(start_tile, end_tile)
 
-        print(self.user_input.selected_algorythm)
-        if(self.user_input.selected_algorythm == 0):
-            print("using dfs search")
-            self.visit_dfs(start_tile)
+        # print(self.user_input.selected_algorythm)
+        # if(self.user_input.selected_algorythm == 0):
+        #     print("using dfs search")
+        #     self.visit_dfs(start_tile)
 
-        if(self.user_input.selected_algorythm == 1):
-            self.start_bfs(start_tile)
-            print("using bfs search")
-            self.path.reverse()
+        self.start_bfs(start_tile)
+        print("using bfs search")
+        self.path.reverse()
 
         if(self.user_input.selected_algorythm == 2):
             self.start_bfs(start_tile)

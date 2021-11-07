@@ -9,8 +9,9 @@ import models.move_direction
 field_model_directory = os.path.join(appsettings.application_root_path, "models\\game_field_model")
 
 class Field(pygame.sprite.Sprite):
-    def __init__(self, all_sprites, field_size, field_matrix, player_spawn_x, player_spawn_y):
+    def __init__(self, all_sprites, field_size, field_matrix, player_spawn_x, player_spawn_y, score_counter):
         self.grid = []
+        self.score_counter = score_counter
         self.max_available_points = 0
         self.field_matrix = field_matrix
         self.field_width = len(field_matrix[0])
@@ -19,6 +20,7 @@ class Field(pygame.sprite.Sprite):
         self.player_spawn_y = player_spawn_y
         self.tile_size = math.floor(field_size / self.field_height)
         self.load_grid(all_sprites)
+        score_counter.set_max_points(self.max_available_points)
         pygame.sprite.Sprite.__init__(self)
 
     def load_grid(self, all_sprites):
@@ -32,7 +34,7 @@ class Field(pygame.sprite.Sprite):
         self.set_grid_neighbours()
 
     def create_tile(self, all_sprites, is_empty, pos_x, pos_y):
-        tile = Tile(is_empty, self.tile_size)
+        tile = Tile(is_empty, self.tile_size, self.score_counter)
         tile.rect.x = pos_x * self.tile_size
         tile.rect.y = pos_y * self.tile_size
         all_sprites.add(tile)

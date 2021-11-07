@@ -9,7 +9,7 @@ class Tile(pygame.sprite.Sprite):
     empty_tile_sprite = pygame.image.load(os.path.join(tile_model_directory, "emptyTile.png"))
     coin_tile_sprite = pygame.image.load(os.path.join(tile_model_directory, "coinTile.png"))
 
-    def __init__(self, is_empty, tile_size):
+    def __init__(self, is_empty, tile_size, score_counter):
         pygame.sprite.Sprite.__init__(self)
         self.tile_size = tile_size
         self.is_empty = is_empty
@@ -17,10 +17,12 @@ class Tile(pygame.sprite.Sprite):
         self.was_walked = False
         self.update_sprite()
         self.rect = self.image.get_rect()
+        self.score_counter = score_counter
         self.init_neighbours()
 
     def update(self):
         if not self.was_changed_empty and self.was_walked:
+            self.score_counter.picked()
             self.update_sprite()
             self.was_changed_empty = True
 

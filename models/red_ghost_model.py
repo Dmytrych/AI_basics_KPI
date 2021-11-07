@@ -24,10 +24,11 @@ class RedGhost(pygame.sprite.Sprite):
         self.current_tile = spawn_tile
         self.movement_speed = math.floor(tile_size / frames_between_tile_pass)
         self.current_move_animation_frame = 0
-        self.selected_move_direction = models.move_direction.right
-        self.current_move_direction = models.move_direction.right
+        self.selected_move_direction = models.move_direction.left
+        self.current_move_direction = models.move_direction.left
         self.stop = False
         self.path_finder = PathFinder(player_input)
+        self.skips = 0
 
         pygame.sprite.Sprite.__init__(self)
 
@@ -36,13 +37,13 @@ class RedGhost(pygame.sprite.Sprite):
         self.set_pos(spawn_tile.rect.x, spawn_tile.rect.y)
 
     def update(self):
+        if(self.player_model.current_tile == self.current_tile):
+            self.player_model.kill()
+
         self.recalculate_path()
 
         if self.path is None or len(self.path) == 0:
             return
-        
-        if(self.player_model.current_tile == self.current_tile):
-            self.player_model.kill()
 
         self.selected_move_direction = self.path[0].side
 
@@ -63,11 +64,12 @@ class RedGhost(pygame.sprite.Sprite):
             self.move_in_direction()
 
     def recalculate_path(self):
-        if self.previous_frame_path_calc_player_tile is not None and self.previous_frame_path_calc_player_tile is self.player_model.current_tile:
+        if self.previous_frame_path_calc_player_tile is not None and self.previous_frame_path_calc_player_tile is self.player_model.current_tile and self.skips < 1:
+            self.skips += 1
             return
 
-        self.path = [self.current_tile.neighbours[0]]# self.path_finder.find(self.current_tile, self.player_model.current_tile).copy()
-
+        self.path = self.path_finder.find(self.current_tile, self.player_model.current_tile).copy()
+        #[self.current_tile.neighbours[0]]
         self.previous_frame_path_calc_player_tile = self.player_model.current_tile
 
     def move_in_direction(self):
@@ -100,6 +102,7 @@ class RedGhost(pygame.sprite.Sprite):
         if self.current_move_animation_frame == tile_switch_frame:
             self.current_tile = neghbour_tile
             self.path.pop(0)
+            print("WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW")
     
     def move_x(self, distance):
         self.rect.x += distance

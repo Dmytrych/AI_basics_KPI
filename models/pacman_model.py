@@ -1,7 +1,7 @@
 import pygame
 import os
 import math
-from a_star_path_finder import AStarPathFinder
+#from a_star_path_finder import AStarPathFinder
 import models.move_direction
 from appsettings import window_size
 from appsettings import image_store_path
@@ -13,6 +13,7 @@ tile_switch_frame = 15
 class Pacman(pygame.sprite.Sprite):
     def __init__(self, spawn_tile, tile_size, user_input_handler):
         self.killed = False
+        self.ghost_tracker = None
         spawn_tile.was_walked = True
         self.user_input = user_input_handler
         self.animation_tick_counter = 0
@@ -22,16 +23,17 @@ class Pacman(pygame.sprite.Sprite):
         self.left_animation_sprites = self.get_left_sprites()
         self.up_down_animation_sprites = self.get_up_down_sprites()
         self.current_tile = spawn_tile
+        self.minimaxer = None
 
-        self.path_finder = AStarPathFinder()
+        #self.path_finder = AStarPathFinder()
         self.path = None
 
         self.destination_food = None
 
         self.movement_speed = math.floor(tile_size / frames_between_tile_pass)
         self.current_move_animation_frame = 0
-        self.selected_move_direction = user_input_handler.selected_direction
-        self.current_move_direction = user_input_handler.selected_direction
+        self.selected_move_direction = models.move_direction.left
+        self.current_move_direction = models.move_direction.left
         self.stop = False
 
         pygame.sprite.Sprite.__init__(self)
@@ -39,12 +41,18 @@ class Pacman(pygame.sprite.Sprite):
         self.image = self.right_animation_sprites[self.current_sprite_index]
         self.rect = self.image.get_rect()
         self.set_pos(spawn_tile.rect.x, spawn_tile.rect.y)
-                
+        self.first_start = True
 
     def update(self):
-        if True:#not self.killed:
-            food = self.locate_closest_food_bfs(self.current_tile)
-            self.selected_move_direction = self.path_finder.find(self.current_tile, food)[0]
+        if not self.killed:
+            if self.first_start or self.ghost_tracker.ghosts_moved():
+                self.ghost_tracker.update_current_info()
+                self.minimaxer.build_subtree()
+                self.selected_move_direction = self.minimaxer.make_desision()
+                self.first_start = False
+
+            #food = self.locate_closest_food_bfs(self.current_tile)
+            #self.selected_move_direction = self.path_finder.find(self.current_tile, food)[0]
 
             self.animation_tick_counter += 1
             if self.animation_tick_counter % 3 == 0:
@@ -99,9 +107,10 @@ class Pacman(pygame.sprite.Sprite):
         if self.current_move_animation_frame is tile_switch_frame:
             self.current_tile = neghbour_tile
             food_tile = self.locate_closest_food_bfs(self.current_tile)
+            print("Tile was switched")
             if(neghbour_tile.was_walked == False):
                 neghbour_tile.was_walked = True
-                self.path = self.path_finder.find(self.current_tile, food_tile)
+                #self.path = self.path_finder.find(self.current_tile, food_tile)
     
     def move_x(self, distance):
         self.rect.x += distance
